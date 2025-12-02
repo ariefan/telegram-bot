@@ -1,0 +1,18 @@
+services:
+  telegram:
+    build: .
+    container_name: telegrambot
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.telegrambot.rule=Host(`telegram.technosmart.id`)"
+      - "traefik.http.routers.telegrambot.entrypoints=web"
+      - "traefik.http.services.telegrambot.loadbalancer.server.port=3000"
+
+networks:
+  dokploy-network:
+    external: true

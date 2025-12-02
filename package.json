@@ -1,0 +1,49 @@
+{
+    "name": "bpjs-chatbot",
+    "version": "1.0.0",
+    "description": "BPJS Kesehatan Debt Collector Chatbot with Telegram and OpenRouter LLM",
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "type-check": "tsc --noEmit"
+    },
+    "keywords": [
+        "bpjs",
+        "chatbot",
+        "telegram",
+        "fastify",
+        "drizzle",
+        "postgresql"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@fastify/swagger": "^8.12.0",
+        "@fastify/swagger-ui": "^1.10.1",
+        "dotenv": "^16.3.1",
+        "drizzle-orm": "^0.29.3",
+        "fastify": "^4.26.1",
+        "openai": "^4.28.0",
+        "postgres": "^3.4.3",
+        "telegraf": "^4.15.3"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.19",
+        "drizzle-kit": "^0.20.14",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.5",
+        "tsx": "^4.7.1",
+        "typescript": "^5.3.3"
+    }
+}
