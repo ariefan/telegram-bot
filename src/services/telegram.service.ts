@@ -86,6 +86,24 @@ export class TelegramService {
         return ctx.reply('Silakan mulai dengan mengetik /start terlebih dahulu.');
       }
 
+      // Auto-detect BPJS number (13 digits) and verify
+      const bpjsPattern = /^\d{13}$/;
+      if (bpjsPattern.test(userMessage.trim()) && !user.isVerified) {
+        await this.db
+          .update(users)
+          .set({
+            bpjsNumber: userMessage.trim(),
+            isVerified: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.telegramId, telegramId));
+
+        return ctx.reply(
+          `✅ Nomor BPJS Anda (${userMessage.trim()}) telah berhasil diverifikasi!\n\n` +
+            `Sekarang Anda dapat bertanya tentang tagihan atau pembayaran BPJS Anda.`
+        );
+      }
+
       // Get or create conversation
       let conversation = await this.db.query.conversations.findFirst({
         where: and(eq(conversations.userId, user.id), eq(conversations.status, 'active')),
