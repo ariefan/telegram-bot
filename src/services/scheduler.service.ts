@@ -25,10 +25,11 @@ export class SchedulerService {
                 }
             },
             {
-                scheduled: true,
                 timezone: 'Asia/Jakarta',
             }
         );
+
+        this.task.start();
 
         console.log('✅ Scheduler started - will run daily at 8:00 AM (Asia/Jakarta)');
 
