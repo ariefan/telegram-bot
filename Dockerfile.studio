@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (including drizzle-kit)
-RUN npm install
+# Install dependencies (including drizzle-kit and pg driver)
+RUN npm install && npm install pg
 
 # Copy necessary files for drizzle
 COPY drizzle.config.ts ./
