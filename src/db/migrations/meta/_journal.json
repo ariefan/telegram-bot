@@ -8,6 +8,13 @@
       "when": 1764615272657,
       "tag": "0000_mature_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1764645794645,
+      "tag": "0001_fresh_hobgoblin",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,8 @@ import { config } from './config/index.js';
 import { db } from './db/index.js';
 import { TelegramService } from './services/telegram.service.js';
 import { LLMService } from './services/llm.service.js';
+import { ReminderService } from './services/reminder.service.js';
+import { SchedulerService } from './services/scheduler.service.js';
 
 async function main() {
     try {
@@ -31,10 +33,16 @@ async function main() {
             await telegramService.launch();
         }
 
+        // Initialize and start scheduler for proactive reminders
+        const reminderService = new ReminderService(db, telegramService, llmService);
+        const schedulerService = new SchedulerService(reminderService);
+        schedulerService.start();
+
         // Graceful shutdown
         const shutdown = async (signal: string) => {
             console.log(`\n${signal} received, shutting down gracefully...`);
 
+            schedulerService.stop();
             await telegramService.stop();
             await server.close();
 

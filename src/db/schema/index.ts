@@ -41,3 +41,13 @@ export const debts = pgTable('debts', {
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const reminders = pgTable('reminders', {
+    id: serial('id').primaryKey(),
+    debtId: integer('debt_id').references(() => debts.id).notNull(),
+    userId: integer('user_id').references(() => users.id).notNull(),
+    reminderType: text('reminder_type').notNull(), // '7_days', '3_days', '1_day'
+    sentAt: timestamp('sent_at').defaultNow().notNull(),
+    status: text('status').default('sent').notNull(), // 'sent', 'failed'
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});

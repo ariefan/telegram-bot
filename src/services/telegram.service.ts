@@ -102,14 +102,7 @@ export class TelegramService {
         conversation = newConversation;
       }
 
-      // Save user message
-      await this.db.insert(messages).values({
-        conversationId: conversation.id,
-        role: 'user',
-        content: userMessage,
-      });
-
-      // Get conversation history
+      // Get conversation history (WITHOUT saving current message yet)
       const history = await this.db.query.messages.findMany({
         where: eq(messages.conversationId, conversation.id),
         orderBy: (messages, { asc }) => [asc(messages.createdAt)],
@@ -147,12 +140,19 @@ export class TelegramService {
         userData
       );
 
-      // Save assistant message
-      await this.db.insert(messages).values({
-        conversationId: conversation.id,
-        role: 'assistant',
-        content: response,
-      });
+      // Save both user message and assistant response together
+      await this.db.insert(messages).values([
+        {
+          conversationId: conversation.id,
+          role: 'user',
+          content: userMessage,
+        },
+        {
+          conversationId: conversation.id,
+          role: 'assistant',
+          content: response,
+        },
+      ]);
 
       await ctx.reply(response);
     });
