@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { config } from '../config/index.js';
+import { buildSystemPrompt } from '../prompts/index.js';
 
 export class LLMService {
     private client: OpenAI;
@@ -15,17 +16,7 @@ export class LLMService {
         messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
         context?: string
     ): Promise<string> {
-        const systemPrompt = `You are a helpful BPJS Kesehatan debt collector chatbot. Your role is to:
-1. Greet users professionally and warmly
-2. Help users verify their identity using their BPJS number
-3. Inform users about their outstanding debts
-4. Provide payment instructions and options
-5. Answer questions about BPJS payments and policies
-6. Be empathetic and understanding about financial difficulties
-
-${context ? `Additional context: ${context}` : ''}
-
-Always be polite, professional, and helpful. Use Indonesian language.`;
+        const systemPrompt = buildSystemPrompt(context);
 
         const chatMessages = [
             { role: 'system' as const, content: systemPrompt },
