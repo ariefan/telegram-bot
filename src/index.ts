@@ -6,8 +6,12 @@ import { LLMService } from './services/llm.service.js';
 
 async function main() {
     try {
-        // Create and start Fastify server
-        const server = await createServer();
+        // Initialize services FIRST
+        const llmService = new LLMService();
+        const telegramService = new TelegramService(db, llmService);
+
+        // Create Fastify server with telegram service
+        const server = await createServer(telegramService);
 
         await server.listen({
             port: config.server.port,
@@ -17,12 +21,15 @@ async function main() {
         console.log(`🚀 Server is running on http://${config.server.host}:${config.server.port}`);
         console.log(`📚 Swagger documentation available at http://${config.server.host}:${config.server.port}/docs`);
 
-        // Initialize services
-        const llmService = new LLMService();
-        const telegramService = new TelegramService(db, llmService);
-
-        // Start Telegram bot
-        await telegramService.launch();
+        // Start Telegram bot in webhook mode (don't use polling)
+        const webhookUrl = config.telegram.webhookUrl;
+        if (webhookUrl) {
+            await telegramService.setWebhook(webhookUrl);
+            console.log(`✅ Telegram webhook configured: ${webhookUrl}`);
+        } else {
+            console.warn('⚠️  No webhook URL configured, bot will use polling mode');
+            await telegramService.launch();
+        }
 
         // Graceful shutdown
         const shutdown = async (signal: string) => {
