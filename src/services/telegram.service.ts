@@ -1,7 +1,7 @@
 import { Telegraf, Context } from 'telegraf';
 import { config } from '../config/index.js';
 import { Database } from '../db/index.js';
-import { users, conversations, messages } from '../db/schema/index.js';
+import { users, conversations, messages, debts } from '../db/schema/index.js';
 import { eq, and } from 'drizzle-orm';
 import { LLMService } from './llm.service.js';
 
@@ -139,7 +139,7 @@ export class TelegramService {
             bpjsNumber: user.bpjsNumber || undefined,
             debts: await this.db.query.debts
               .findMany({
-                where: eq(users.id, user.id),
+                where: eq(debts.userId, user.id),
               })
               .then((debts) =>
                 debts.map((d) => ({
