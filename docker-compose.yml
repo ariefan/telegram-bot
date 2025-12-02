@@ -9,9 +9,27 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.telegrambot.rule=Host(`telegram.technosmart.id`)"
+      - "traefik.http.routers.telegrambot.rule=Host(`telegram.technosmart.id`) && !PathPrefix(`/db`)"
       - "traefik.http.routers.telegrambot.entrypoints=web"
       - "traefik.http.services.telegrambot.loadbalancer.server.port=3000"
+
+  drizzle-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.studio
+    container_name: drizzle-studio
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.drizzlestudio.rule=Host(`telegram.technosmart.id`) && PathPrefix(`/db`)"
+      - "traefik.http.routers.drizzlestudio.entrypoints=web"
+      - "traefik.http.middlewares.drizzlestudio-stripprefix.stripprefix.prefixes=/db"
+      - "traefik.http.routers.drizzlestudio.middlewares=drizzlestudio-stripprefix"
+      - "traefik.http.services.drizzlestudio.loadbalancer.server.port=4983"
 
 networks:
   dokploy-network:
