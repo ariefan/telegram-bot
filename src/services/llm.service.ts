@@ -4,19 +4,37 @@ import { buildSystemPrompt } from '../prompts/index.js';
 
 export class LLMService {
     private client: OpenAI;
+    private model: string;
+    private provider: string;
 
     constructor() {
-        this.client = new OpenAI({
-            baseURL: 'https://openrouter.ai/api/v1',
-            apiKey: config.openrouter.apiKey,
-        });
+        const provider = config.llm.provider;
+        this.provider = provider;
+
+        if (provider === 'together') {
+            this.client = new OpenAI({
+                baseURL: config.llm.together.baseURL,
+                apiKey: config.llm.together.apiKey,
+            });
+            this.model = config.llm.together.model;
+            console.log(`✅ LLM Service initialized with Together.ai (${this.model})`);
+        } else {
+            // Default to OpenRouter
+            this.client = new OpenAI({
+                baseURL: config.llm.openrouter.baseURL,
+                apiKey: config.llm.openrouter.apiKey,
+            });
+            this.model = config.llm.openrouter.model;
+            console.log(`✅ LLM Service initialized with OpenRouter (${this.model})`);
+        }
     }
 
     async generateResponse(
         messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-        context?: string
+        context?: string,
+        isFirstMessage?: boolean
     ): Promise<string> {
-        const systemPrompt = buildSystemPrompt(context);
+        const systemPrompt = buildSystemPrompt(context, isFirstMessage);
 
         const chatMessages = [
             { role: 'system' as const, content: systemPrompt },
@@ -24,7 +42,7 @@ export class LLMService {
         ];
 
         const response = await this.client.chat.completions.create({
-            model: config.openrouter.model,
+            model: this.model,
             messages: chatMessages,
             temperature: 0.7,
             max_tokens: 500,
@@ -68,6 +86,9 @@ export class LLMService {
             { role: 'user' as const, content: userMessage },
         ];
 
-        return this.generateResponse(messages, context);
+        // Detect if this is the first message (no conversation history)
+        const isFirstMessage = conversationHistory.length === 0;
+
+        return this.generateResponse(messages, context, isFirstMessage);
     }
 }

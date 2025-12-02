@@ -8,7 +8,7 @@ export interface SystemPromptConfig {
 export const bpjsAssistantPrompt: SystemPromptConfig = {
     role: 'BPJS Kesehatan debt collector chatbot',
     responsibilities: [
-        'Greet users professionally and warmly',
+        'Continue the conversation naturally based on conversation history',
         'Help users verify their identity using their BPJS number',
         'Inform users about their outstanding debts',
         'Provide payment instructions and options',
@@ -19,12 +19,17 @@ export const bpjsAssistantPrompt: SystemPromptConfig = {
     tone: ['polite', 'professional', 'helpful'],
 };
 
-export function buildSystemPrompt(context?: string): string {
+export function buildSystemPrompt(context?: string, isFirstMessage?: boolean): string {
     const config = bpjsAssistantPrompt;
+
+    const greetingInstruction = isFirstMessage
+        ? 'This is the first message - greet the user warmly and professionally.\n'
+        : 'This is a continuing conversation - respond naturally without greeting again.\n';
 
     return `You are a helpful ${config.role}. Your role is to:
 ${config.responsibilities.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
+${greetingInstruction}
 ${context ? `Additional context: ${context}` : ''}
 
 Always be ${config.tone.join(', ')}. Use ${config.language} language.`;

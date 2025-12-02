@@ -5,11 +5,12 @@ A Telegram chatbot for BPJS Kesehatan debt collection using Fastify, Drizzle ORM
 ## Features
 
 - 🤖 **Telegram Bot Integration** - Interactive chatbot for debt collection
-- 🧠 **LLM with RAG** - OpenRouter-powered responses with user context
+- 🧠 **Multi-Provider LLM with RAG** - OpenRouter or Together.ai powered responses with user context
 - 📊 **REST API** - Fastify-based API with Swagger documentation
 - 💾 **PostgreSQL Database** - Drizzle ORM for type-safe database operations
 - 🔍 **User Verification** - BPJS number validation
 - 💰 **Debt Management** - Track and manage user debts
+- 📅 **Proactive Reminders** - AI-generated reminders sent at 7, 3, and 1 day before due date
 
 ## Project Structure
 
@@ -45,7 +46,7 @@ telegram-bot/
 - PostgreSQL 14+
 - pnpm
 - Telegram Bot Token (from [@BotFather](https://t.me/botfather))
-- OpenRouter API Key
+- LLM API Key (OpenRouter or Together.ai)
 
 ## Setup
 
@@ -59,11 +60,13 @@ telegram-bot/
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` and fill in your credentials:
    - `DATABASE_URL` - PostgreSQL connection string
    - `TELEGRAM_BOT_TOKEN` - Your Telegram bot token
-   - `OPENROUTER_API_KEY` - Your OpenRouter API key
+   - `LLM_PROVIDER` - Choose 'openrouter' or 'together' (default: openrouter)
+   - `OPENROUTER_API_KEY` - Your OpenRouter API key (if using OpenRouter)
+   - `TOGETHER_API_KEY` - Your Together.ai API key (if using Together.ai)
 
 3. **Set up the database:**
    ```bash
@@ -163,16 +166,45 @@ pnpm start
 - RESTful endpoints for all resources
 - No authentication (demo purposes)
 
+## LLM Provider Configuration
+
+This project supports multiple LLM providers. You can choose between OpenRouter and Together.ai by setting the `LLM_PROVIDER` environment variable.
+
+### Using OpenRouter (default)
+
+```bash
+LLM_PROVIDER=openrouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_MODEL=openai/gpt-4-turbo-preview
+```
+
+### Using Together.ai
+
+```bash
+LLM_PROVIDER=together
+TOGETHER_API_KEY=your_together_api_key
+TOGETHER_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo
+```
+
+Both providers use OpenAI-compatible APIs, so switching between them is seamless.
+
 ## Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `PORT` | Server port | No (default: 3000) |
 | `HOST` | Server host | No (default: 0.0.0.0) |
+| `NODE_ENV` | Environment mode | No (default: development) |
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token | Yes |
-| `OPENROUTER_API_KEY` | OpenRouter API key | Yes |
-| `OPENROUTER_MODEL` | LLM model to use | No (default: gpt-4-turbo-preview) |
+| `TELEGRAM_WEBHOOK_URL` | Webhook URL for production | No |
+| `LLM_PROVIDER` | LLM provider ('openrouter' or 'together') | No (default: openrouter) |
+| `OPENROUTER_API_KEY` | OpenRouter API key | Conditional (required if provider is openrouter) |
+| `OPENROUTER_MODEL` | OpenRouter model | No (default: openai/gpt-4-turbo-preview) |
+| `TOGETHER_API_KEY` | Together.ai API key | Conditional (required if provider is together) |
+| `TOGETHER_MODEL` | Together.ai model | No (default: meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo) |
+| `BPJS_API_URL` | BPJS API endpoint | No |
+| `BPJS_API_KEY` | BPJS API key | No |
 
 ## License
 
