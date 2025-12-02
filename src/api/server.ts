@@ -7,8 +7,9 @@ import { debtRoutes } from './routes/debts.routes.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { telegramRoutes } from './routes/telegram.routes.js';
 import { config } from '../config/index.js';
+import { TelegramService } from '../services/telegram.service.js';
 
-export async function createServer() {
+export async function createServer(telegramService?: TelegramService) {
   const fastify = Fastify({
     logger: {
       level: config.server.nodeEnv === 'development' ? 'info' : 'warn',
@@ -34,6 +35,7 @@ export async function createServer() {
         { name: 'users', description: 'User management endpoints' },
         { name: 'conversations', description: 'Conversation management endpoints' },
         { name: 'debts', description: 'Debt management endpoints' },
+        { name: 'telegram', description: 'Telegram webhook management endpoints' },
       ],
     },
   });
@@ -53,7 +55,11 @@ export async function createServer() {
   await fastify.register(userRoutes, { prefix: '/api' });
   await fastify.register(conversationRoutes, { prefix: '/api' });
   await fastify.register(debtRoutes, { prefix: '/api' });
-  await fastify.register(telegramRoutes, { prefix: '' });
+
+  // Register telegram routes only if service is provided
+  if (telegramService) {
+    await fastify.register(telegramRoutes, { prefix: '', telegramService });
+  }
 
   return fastify;
 }
