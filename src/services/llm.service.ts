@@ -45,7 +45,7 @@ export class LLMService {
             model: this.model,
             messages: chatMessages,
             temperature: 0.7,
-            max_tokens: 500,
+            max_tokens: 1500,
         });
 
         return response.choices[0]?.message?.content || 'Maaf, saya tidak dapat memproses permintaan Anda saat ini.';
