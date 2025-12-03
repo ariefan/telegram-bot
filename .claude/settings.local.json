@@ -1,4 +1,9 @@
 {
+  "env": {
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.6",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.6"
+  },
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
@@ -8,7 +13,11 @@
       "Bash(./node_modules/.bin/tsc:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add proactive messaging system and fix conversation memory\n\nMajor Features:\n1. Proactive debt reminder system with AI-generated messages\n2. Fix conversation memory bug (duplicate user messages)\n3. Database seeding for testing\n\nChanges:\n\n**Conversation Memory Fix:**\n- Fixed bug where user messages were sent to LLM twice\n- Refactored to save user and assistant messages together after response\n- Ensures clean conversation history without duplicates\n\n**Proactive Messaging System:**\n- Added reminders table schema for tracking sent notifications\n- Created ReminderService for processing and sending reminders\n- Created SchedulerService with node-cron for daily 8AM checks\n- Sends AI-personalized reminders at 7, 3, and 1 day before due date\n- Only sends for unpaid debts, tracks sent reminders to avoid duplicates\n\n**Database:**\n- Created seed file with sample users and debts\n- Applied migration for reminders table\n- Seeded Neon database with test data\n\n**Dependencies:**\n- Added node-cron and @types/node-cron\n\n**Files Created:**\n- src/services/reminder.service.ts\n- src/services/scheduler.service.ts\n- seeds/initial-data.sql\n- src/db/migrations/0001_fresh_hobgoblin.sql\n\n**Files Modified:**\n- src/services/telegram.service.ts (memory fix)\n- src/db/schema/index.ts (reminders table)\n- src/index.ts (scheduler integration)\n- package.json (dependencies)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

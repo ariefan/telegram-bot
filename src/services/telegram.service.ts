@@ -4,6 +4,7 @@ import { Database } from '../db/index.js';
 import { users, conversations, messages, debts } from '../db/schema/index.js';
 import { eq, and } from 'drizzle-orm';
 import { LLMService } from './llm.service.js';
+import { socketService } from './socket.service.js';
 
 export class TelegramService {
   private bot: Telegraf;
@@ -37,6 +38,9 @@ export class TelegramService {
           })
           .returning();
         user = newUser;
+
+        // Emit Socket.io event for real-time dashboard updates
+        socketService.emit('user:created', newUser);
       }
 
       await ctx.reply(
@@ -118,6 +122,9 @@ export class TelegramService {
           })
           .returning();
         conversation = newConversation;
+
+        // Emit Socket.io event for real-time dashboard updates
+        socketService.emit('conversation:created', newConversation);
       }
 
       // Get conversation history (WITHOUT saving current message yet)
@@ -159,7 +166,7 @@ export class TelegramService {
       );
 
       // Save both user message and assistant response together
-      await this.db.insert(messages).values([
+      const newMessages = await this.db.insert(messages).values([
         {
           conversationId: conversation.id,
           role: 'user',
@@ -170,7 +177,10 @@ export class TelegramService {
           role: 'assistant',
           content: response,
         },
-      ]);
+      ]).returning();
+
+      // Emit Socket.io event for real-time dashboard updates
+      socketService.emit('message:created', newMessages);
 
       await ctx.reply(response);
     });

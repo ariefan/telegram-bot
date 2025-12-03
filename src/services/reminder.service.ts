@@ -3,6 +3,7 @@ import { debts, users, reminders } from '../db/schema/index.js';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { TelegramService } from './telegram.service.js';
 import { LLMService } from './llm.service.js';
+import { socketService } from './socket.service.js';
 
 export class ReminderService {
     private db: Database;
@@ -93,12 +94,15 @@ export class ReminderService {
                 await this.sendReminderToUser(user.telegramId, message);
 
                 // Record the reminder
-                await this.db.insert(reminders).values({
+                const [newReminder] = await this.db.insert(reminders).values({
                     debtId: debt.id,
                     userId: user.id,
                     reminderType,
                     status: 'sent',
-                });
+                }).returning();
+
+                // Emit Socket.io event for real-time dashboard updates
+                socketService.emit('reminder:sent', newReminder);
 
                 console.log(`Sent ${reminderType} reminder to user ${user.name} for debt ${debt.id}`);
             } catch (error) {
@@ -106,12 +110,15 @@ export class ReminderService {
 
                 // Record failed reminder
                 try {
-                    await this.db.insert(reminders).values({
+                    const [failedReminder] = await this.db.insert(reminders).values({
                         debtId: debt.id,
                         userId: debt.userId,
                         reminderType,
                         status: 'failed',
-                    });
+                    }).returning();
+
+                    // Emit Socket.io event for real-time dashboard updates
+                    socketService.emit('reminder:sent', failedReminder);
                 } catch (dbError) {
                     console.error('Failed to record failed reminder:', dbError);
                 }

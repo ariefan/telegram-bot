@@ -5,15 +5,17 @@ import { TelegramService } from './services/telegram.service.js';
 import { LLMService } from './services/llm.service.js';
 import { ReminderService } from './services/reminder.service.js';
 import { SchedulerService } from './services/scheduler.service.js';
+import { socketService } from './services/socket.service.js';
 
 async function main() {
     try {
         // Initialize services FIRST
         const llmService = new LLMService();
         const telegramService = new TelegramService(db, llmService);
+        const reminderService = new ReminderService(db, telegramService, llmService);
 
-        // Create Fastify server with telegram service
-        const server = await createServer(telegramService);
+        // Create Fastify server with telegram service and reminder service
+        const server = await createServer(telegramService, reminderService);
 
         await server.listen({
             port: config.server.port,
@@ -22,6 +24,10 @@ async function main() {
 
         console.log(`🚀 Server is running on http://${config.server.host}:${config.server.port}`);
         console.log(`📚 Swagger documentation available at http://${config.server.host}:${config.server.port}/docs`);
+
+        // Initialize Socket.io with HTTP server for real-time updates
+        socketService.initialize(server.server);
+        console.log('✅ Socket.io initialized for real-time dashboard updates');
 
         // Start Telegram bot in webhook mode (don't use polling)
         const webhookUrl = config.telegram.webhookUrl;
@@ -34,7 +40,6 @@ async function main() {
         }
 
         // Initialize and start scheduler for proactive reminders
-        const reminderService = new ReminderService(db, telegramService, llmService);
         const schedulerService = new SchedulerService(reminderService);
         schedulerService.start();
 

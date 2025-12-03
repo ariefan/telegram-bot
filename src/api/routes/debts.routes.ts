@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { db } from '../../db/index.js';
 import { debts } from '../../db/schema/index.js';
 import { eq } from 'drizzle-orm';
+import { socketService } from '../../services/socket.service.js';
 
 export async function debtRoutes(fastify: FastifyInstance) {
     // Get all debts
@@ -91,6 +92,9 @@ export async function debtRoutes(fastify: FastifyInstance) {
             description: body.description,
         }).returning();
 
+        // Emit Socket.io event for real-time dashboard updates
+        socketService.emit('debt:created', newDebt);
+
         return newDebt;
     });
 
@@ -126,6 +130,48 @@ export async function debtRoutes(fastify: FastifyInstance) {
             return { error: 'Debt not found' };
         }
 
+        // Emit Socket.io event for real-time dashboard updates
+        socketService.emit('debt:updated', updatedDebt);
+
         return updatedDebt;
+    });
+
+    // Delete debt
+    fastify.delete('/debts/:id', {
+        schema: {
+            description: 'Delete a debt',
+            tags: ['debts'],
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'number' },
+                },
+                required: ['id'],
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                    },
+                },
+            },
+        },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: number };
+
+        const [deletedDebt] = await db.delete(debts)
+            .where(eq(debts.id, id))
+            .returning();
+
+        if (!deletedDebt) {
+            reply.status(404);
+            return { error: 'Debt not found' };
+        }
+
+        // Emit Socket.io event for real-time dashboard updates
+        socketService.emit('debt:deleted', { id });
+
+        return { success: true };
     });
 }
